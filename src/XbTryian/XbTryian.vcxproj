@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="animlib.cpp" />
+    <ClCompile Include="backgrnd.cpp" />
+    <ClCompile Include="config.cpp" />
+    <ClCompile Include="config_file.cpp" />
+    <ClCompile Include="crt_compat.cpp" />
+    <ClCompile Include="destruct.cpp" />
+    <ClCompile Include="editship.cpp" />
+    <ClCompile Include="episodes.cpp" />
+    <ClCompile Include="file.cpp" />
+    <ClCompile Include="font.cpp" />
+    <ClCompile Include="fonthand.cpp" />
+    <ClCompile Include="game_menu.cpp" />
+    <ClCompile Include="game_stubs.cpp" />
+    <ClCompile Include="helptext.cpp" />
+    <ClCompile Include="input.cpp" />
+    <ClCompile Include="joystiq_stub.cpp" />
+    <ClCompile Include="jukebox.cpp" />
+    <ClCompile Include="keyboard.cpp" />
+    <ClCompile Include="lds_play.cpp" />
+    <ClCompile Include="loudness.cpp" />
+    <ClCompile Include="lvllib.cpp" />
+    <ClCompile Include="lvlmast.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainint.cpp" />
+    <ClCompile Include="menus.cpp" />
+    <ClCompile Include="mouse_stub.cpp" />
+    <ClCompile Include="mtrand.cpp" />
+    <ClCompile Include="musmast.cpp" />
+    <ClCompile Include="nortsong.cpp" />
+    <ClCompile Include="nortvars.cpp" />
+    <ClCompile Include="opentyr.cpp" />
+    <ClCompile Include="opl.cpp" />
+    <ClCompile Include="palette.cpp" />
+    <ClCompile Include="params.cpp" />
+    <ClCompile Include="pcxload.cpp" />
+    <ClCompile Include="pcxmast.cpp" />
+    <ClCompile Include="picload.cpp" />
+    <ClCompile Include="player.cpp" />
+    <ClCompile Include="sdl_shim.cpp" />
+    <ClCompile Include="shots.cpp" />
+    <ClCompile Include="sizebuf.cpp" />
+    <ClCompile Include="sndmast.cpp" />
+    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="starlib.cpp" />
+    <ClCompile Include="tyrian2.cpp" />
+    <ClCompile Include="varz.cpp" />
+    <ClCompile Include="vga256d.cpp" />
+    <ClCompile Include="vga_palette.cpp" />
+    <ClCompile Include="video.cpp" />
+    <ClCompile Include="video_scale_stub.cpp" />
+    <ClCompile Include="xmas.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Media\Copy Assets Here.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="animlib.h" />
+    <ClInclude Include="backgrnd.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="config_file.h" />
+    <ClInclude Include="darkone83_splash.h" />
+    <ClInclude Include="destruct.h" />
+    <ClInclude Include="editship.h" />
+    <ClInclude Include="episodes.h" />
+    <ClInclude Include="file.h" />
+    <ClInclude Include="font.h" />
+    <ClInclude Include="fonthand.h" />
+    <ClInclude Include="game_menu.h" />
+    <ClInclude Include="helptext.h" />
+    <ClInclude Include="input.h" />
+    <ClInclude Include="joystick.h" />
+    <ClInclude Include="jukebox.h" />
+    <ClInclude Include="keyboard.h" />
+    <ClInclude Include="lds_play.h" />
+    <ClInclude Include="loudness.h" />
+    <ClInclude Include="lvllib.h" />
+    <ClInclude Include="lvlmast.h" />
+    <ClInclude Include="mainint.h" />
+    <ClInclude Include="menus.h" />
+    <ClInclude Include="mouse.h" />
+    <ClInclude Include="mtrand.h" />
+    <ClInclude Include="musmast.h" />
+    <ClInclude Include="network.h" />
+    <ClInclude Include="nortsong.h" />
+    <ClInclude Include="nortvars.h" />
+    <ClInclude Include="opentyr.h" />
+    <ClInclude Include="opentyrian_version.h" />
+    <ClInclude Include="opl.h" />
+    <ClInclude Include="palette.h" />
+    <ClInclude Include="params.h" />
+    <ClInclude Include="pcxload.h" />
+    <ClInclude Include="pcxmast.h" />
+    <ClInclude Include="picload.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="sdl.h" />
+    <ClInclude Include="sdl_endian.h" />
+    <ClInclude Include="sdl_types.h" />
+    <ClInclude Include="shots.h" />
+    <ClInclude Include="sizebuf.h" />
+    <ClInclude Include="sndmast.h" />
+    <ClInclude Include="sprite.h" />
+    <ClInclude Include="starlib.h" />
+    <ClInclude Include="stdbool.h" />
+    <ClInclude Include="stdint.h" />
+    <ClInclude Include="tyrian2.h" />
+    <ClInclude Include="varz.h" />
+    <ClInclude Include="vga256d.h" />
+    <ClInclude Include="vga_palette.h" />
+    <ClInclude Include="video.h" />
+    <ClInclude Include="video_scale.h" />
+    <ClInclude Include="xmas.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{5d2e2d45-5ac9-4924-9416-6f6b92274f15}</ProjectGuid>
+    <RootNamespace>XbTryian</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>XbTryian</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <!-- Auto-select toolset based on Visual Studio version -->
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '17.0'">v143</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '18.0'">v145</PlatformToolset>
+    <!-- Fallback to v142 if none match -->
+    <PlatformToolset Condition="'$(PlatformToolset)' == ''">v142</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <!-- Auto-select toolset based on Visual Studio version -->
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '17.0'">v143</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '18.0'">v145</PlatformToolset>
+    <!-- Fallback to v142 if none match -->
+    <PlatformToolset Condition="'$(PlatformToolset)' == ''">v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(RXDK_LIBS)include</IncludePath>
+    <ExternalIncludePath>$(RXDK_LIBS)include</ExternalIncludePath>
+    <LibraryWPath />
+    <SourcePath />
+    <ExcludePath>$(CommonExcludePath);$(VC_ExecutablePath_x86);$(RXDK_LIBS)lib</ExcludePath>
+    <ReferencePath>$(RXDK_LIBS)lib</ReferencePath>
+    <LibraryPath>$(RXDK_LIBS)lib</LibraryPath>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(VC_IncludePath);$(RXDK_LIBS)include</IncludePath>
+    <ExternalIncludePath>$(RXDK_LIBS)include</ExternalIncludePath>
+    <LibraryWPath />
+    <SourcePath />
+    <ExcludePath>$(CommonExcludePath);$(VC_ExecutablePath_x86);$(RXDK_LIBS)lib</ExcludePath>
+    <ReferencePath>$(RXDK_LIBS)lib</ReferencePath>
+    <LibraryPath>$(RXDK_LIBS)lib</LibraryPath>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>XBOX;_XBOX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/arch:SSE %(AdditionalOptions)</AdditionalOptions>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>xboxkrnl.lib;libcmtd.lib;xapilibd.lib;d3d8d.lib;d3dx8d.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <BaseAddress>
+      </BaseAddress>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <GenerateMapFile>true</GenerateMapFile>
+      <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalOptions>/ignore:4254 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Message>Creating Xbox Image...</Message>
+      <Command>"$(RXDK_LIBS)bin\patchSubsystem.exe" -i="$(OutDir)$(TargetFileName)" -s=0x000E
+"$(RXDK_LIBS)bin\imagebld.exe" /in:"$(OutDir)$(TargetFileName)" /out:"$(OutDir)$(TargetName).xbe" /nologo /stack:65536 /debug /nolibwarn
+MKDIR "$(OutDir)Build\$(ProjectName)"
+COPY /Y "$(OutDir)$(TargetName).xbe" "$(OutDir)Build\$(ProjectName)\default.xbe"
+XCOPY /I /E /S /Y /F "$(ProjectDir)Media\*" "$(OutDir)Build\$(ProjectName)"
+MKDIR "$(OutDir)XISO"
+"$(RXDK_LIBS)bin\xdvdfs.exe" pack "$(OutDir)Build\$(ProjectName)" "$(OutDir)XISO\$(ProjectName).iso"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>XBOX;_XBOX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/arch:SSE %(AdditionalOptions)</AdditionalOptions>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>xboxkrnl.lib;libcmt.lib;xapilib.lib;d3d8.lib;d3dx8.lib;dsound.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <BaseAddress>
+      </BaseAddress>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <GenerateMapFile>true</GenerateMapFile>
+      <FixedBaseAddress>false</FixedBaseAddress>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalOptions>/ignore:4254 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Message>Creating Xbox Image...</Message>
+      <Command>"$(RXDK_LIBS)bin\patchSubsystem.exe" -i="$(OutDir)$(TargetFileName)" -s=0x000E
+COPY /Y "$(ProjectDir)titleimage.png" "$(OutDir)titleimage.png" &gt;NUL
+ECHO Texture MyTex &gt; "$(OutDir)titleimage.rdf"
+ECHO { &gt;&gt; "$(OutDir)titleimage.rdf"
+ECHO Source titleimage.png &gt;&gt; "$(OutDir)titleimage.rdf"
+ECHO Format D3DFMT_DXT1 &gt;&gt; "$(OutDir)titleimage.rdf"
+ECHO Width 128 &gt;&gt; "$(OutDir)titleimage.rdf"
+ECHO Height 128 &gt;&gt; "$(OutDir)titleimage.rdf"
+ECHO } &gt;&gt; "$(OutDir)titleimage.rdf"
+"$(RXDK_LIBS)bin\bundler.exe" "$(OutDir)titleimage.rdf" -o "$(OutDir)titleimage.xbx"
+DEL /q "$(OutDir)titleimage.rdf"
+DEL /q "$(OutDir)titleimage.h"
+"$(RXDK_LIBS)bin\imagebld.exe" /in:"$(OutDir)$(TargetFileName)" /out:"$(OutDir)$(TargetName).xbe" /nologo /stack:65536 /debug /nolibwarn /testid:"0x5452004" /testname:"XbTyrian" /titleimage:"$(OutDir)titleimage.xbx" /defaultsaveimage:"$(OutDir)titleimage.xbx"
+MKDIR "$(OutDir)Build\$(ProjectName)" &gt;NUL 2&gt;&amp;1
+COPY /Y "$(OutDir)$(TargetName).xbe" "$(OutDir)Build\$(ProjectName)\default.xbe" &gt;NUL
+XCOPY /C /Q /I /E /S /Y /F "$(ProjectDir)Media\*" "$(OutDir)Build\$(ProjectName)" &gt;NUL 2&gt;NUL
+MKDIR "$(OutDir)XISO" &gt;NUL 2&gt;&amp;1
+"$(RXDK_LIBS)bin\xdvdfs.exe" pack "$(OutDir)Build\$(ProjectName)" "$(OutDir)XISO\$(ProjectName).iso"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project requires Team Resurgent's XDK Libs installed on this computer. Search for them on http://www.theusualplaces.co.uk.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists($(RXDK_LIBS))" Text="$([System.String]::Format('$(ErrorText)'))" />
+  </Target>
+</Project>
