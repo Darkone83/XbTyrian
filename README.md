@@ -1,5 +1,11 @@
 # XbTryian
 
+<div align=center>
+
+<img src="https://github.com/Darkone83/XbTryian/blob/main/img/XbTyrian.png" width=300> <img src="https://github.com/Darkone83/XbTryian/blob/main/img/Darkone83.png" width=400>
+
+</div>
+
 **XbTryian** is an original Xbox / RXDK conversion of **OpenTyrian**, converted by **darkone83**.
 
 OpenTyrian is an open-source port of the DOS vertical scrolling shooter **Tyrian**. This project keeps the OpenTyrian foundation intact while adding the Xbox/RXDK platform work needed to run on original Xbox hardware.
@@ -22,9 +28,131 @@ This is an Xbox/RXDK homebrew port. Current port work includes:
 
 ## Required Game Data
 
-XbTryian requires the **Tyrian 2.1 data files**. These are not included as source code in this project.
+XbTryian requires the **Tyrian 2.1 data files**. The OpenTyrian project documents that the Tyrian 2.1 data files were released as freeware.
 
-OpenTyrian documents that the Tyrian 2.1 data files were released as freeware. Place the required data files beside the XBE or in the configured data directory used by this Xbox build.
+Freeware Tyrian 2.1 data download:
+
+<https://camanis.net/tyrian/tyrian21.zip>
+
+Place the required data files beside the XBE or in the configured data directory used by this Xbox build. Do not use Tyrian 1.x, Tyrian 2.0, or Tyrian 2000 data files for this build unless the source has been specifically modified for them.
+
+### Required Data File List
+
+```text
+cubetxt1.dat
+cubetxt2.dat
+cubetxt3.dat
+cubetxt4.dat
+cubetxt5.dat
+
+demo.1
+demo.2
+demo.3
+demo.4
+demo.5
+
+levels1.dat
+levels2.dat
+levels3.dat
+levels4.dat
+levels5.dat
+
+music.mus
+palette.dat
+tyrend.anm
+tyrian.cdt
+tyrian.hdt
+tyrian.pic
+tyrian.shp
+tyrian.snd
+voices.snd
+
+tyrian1.lvl
+tyrian2.lvl
+tyrian3.lvl
+tyrian4.lvl
+tyrian5.lvl
+
+estsc.shp
+
+newsh0.shp
+newsh1.shp
+newsh2.shp
+newsh3.shp
+newsh4.shp
+newsh5.shp
+newsh6.shp
+newsh7.shp
+newsh8.shp
+newsh9.shp
+newsha.shp
+newshb.shp
+newshc.shp
+newshd.shp
+newshe.shp
+newshf.shp
+newshg.shp
+newshh.shp
+newshi.shp
+newshj.shp
+newshk.shp
+newshl.shp
+newshm.shp
+newshn.shp
+newsho.shp
+newshp.shp
+newshq.shp
+newshr.shp
+newshs.shp
+newsht.shp
+newshu.shp
+newshv.shp
+newsh#.shp
+newsh@.shp
+newsh^.shp
+newsh~.shp
+
+shapesa.dat
+shapesb.dat
+shapesc.dat
+shapesd.dat
+shapese.dat
+shapesf.dat
+shapesg.dat
+shapesh.dat
+shapesi.dat
+shapesj.dat
+shapesk.dat
+shapesl.dat
+shapesm.dat
+shapesn.dat
+shapeso.dat
+shapesp.dat
+shapesq.dat
+shapesr.dat
+shapess.dat
+shapest.dat
+shapesu.dat
+shapesv.dat
+```
+
+### Optional / Runtime-Generated Files
+
+These files are not required for a clean install, but may appear after running the game:
+
+```text
+opentyrian.cfg
+tyrian.cfg
+tyrian.sav
+demorec.*
+```
+
+Optional Christmas-mode files, if you intentionally want them:
+
+```text
+tyrianc.shp
+voicesc.snd
+```
 
 ## Controls
 
