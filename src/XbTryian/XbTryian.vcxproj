@@ -105,6 +105,7 @@
     <ClInclude Include="pcxmast.h" />
     <ClInclude Include="picload.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="rxdk_splash.h" />
     <ClInclude Include="sdl.h" />
     <ClInclude Include="sdl_endian.h" />
     <ClInclude Include="sdl_types.h" />

@@ -18,6 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _XBOX
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 const char* custom_data_dir = NULL;
 
 // XeImageFileName — Xbox kernel export holding the running XBE's full path.
@@ -65,26 +70,135 @@ const char* data_dir(void)
 // Uses backslash separator; avoids sprintf.
 // ---------------------------------------------------------------------------
 
-FILE* dir_fopen(const char* dir, const char* file, const char* mode)
+static void build_path(char* path, size_t path_size, const char* dir, const char* file)
 {
-    char path[256];
-    strncpy(path, dir, sizeof(path) - 1);
-    path[sizeof(path) - 1] = '\0';
+    strncpy(path, dir, path_size - 1);
+    path[path_size - 1] = '\0';
 
     // Append separator if the directory doesn't already end with one.
     size_t dlen = strlen(path);
     if (dlen > 0 && path[dlen - 1] != '\\' && path[dlen - 1] != '/')
     {
-        if (dlen < sizeof(path) - 1)
+        if (dlen < path_size - 1)
         {
             path[dlen] = '\\';
             path[dlen + 1] = '\0';
         }
     }
 
-    strncat(path, file, sizeof(path) - strlen(path) - 1);
+    strncat(path, file, path_size - strlen(path) - 1);
+}
 
+#ifdef _XBOX
+static FILE* xbox_fopen_createfile(const char* path, const char* mode)
+{
+    DWORD access = 0;
+    DWORD creation = OPEN_EXISTING;
+    int oflag = 0;
+
+    const bool want_read = strchr(mode, 'r') != NULL;
+    const bool want_write = strchr(mode, 'w') != NULL;
+    const bool want_append = strchr(mode, 'a') != NULL;
+    const bool want_update = strchr(mode, '+') != NULL;
+    const bool want_binary = strchr(mode, 'b') != NULL;
+
+    if (want_read || want_update)
+    {
+        access |= GENERIC_READ;
+        oflag |= _O_RDONLY;
+    }
+
+    if (want_write || want_append || want_update)
+    {
+        access |= GENERIC_WRITE;
+        oflag &= ~_O_RDONLY;
+        oflag |= _O_WRONLY;
+    }
+
+    if (want_update)
+    {
+        oflag &= ~_O_WRONLY;
+        oflag |= _O_RDWR;
+    }
+
+    if (want_binary)
+        oflag |= _O_BINARY;
+    else
+        oflag |= _O_TEXT;
+
+    if (want_write)
+    {
+        creation = CREATE_ALWAYS;
+        oflag |= _O_CREAT | _O_TRUNC;
+    }
+    else if (want_append)
+    {
+        creation = OPEN_ALWAYS;
+        oflag |= _O_CREAT | _O_APPEND;
+    }
+    else
+    {
+        creation = OPEN_EXISTING;
+    }
+
+    HANDLE hf = CreateFileA(
+        path,
+        access,
+        FILE_SHARE_READ,
+        NULL,
+        creation,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    if (hf == INVALID_HANDLE_VALUE)
+        return NULL;
+
+    int fd = _open_osfhandle((long)hf, oflag);
+    if (fd < 0)
+    {
+        CloseHandle(hf);
+        return NULL;
+    }
+
+    FILE* f = _fdopen(fd, mode);
+    if (f == NULL)
+    {
+        _close(fd);
+        return NULL;
+    }
+
+    if (want_append)
+        fseek(f, 0, SEEK_END);
+
+    return f;
+}
+#endif
+
+FILE* dir_fopen(const char* dir, const char* file, const char* mode)
+{
+    char path[256];
+    build_path(path, sizeof(path), dir, file);
+
+#ifdef _XBOX
+    return xbox_fopen_createfile(path, mode);
+#else
     return fopen(path, mode);
+#endif
+}
+
+static bool is_optional_runtime_file(const char* file)
+{
+    return strcmp(file, "tyrian.cfg") == 0 ||
+        strcmp(file, "opentyrian.cfg") == 0 ||
+        strcmp(file, "tyrian.sav") == 0;
+}
+
+static bool is_read_only_mode(const char* mode)
+{
+    return mode != NULL &&
+        mode[0] == 'r' &&
+        strchr(mode, '+') == NULL;
 }
 
 FILE* dir_fopen_warn(const char* dir, const char* file, const char* mode)
@@ -92,6 +206,14 @@ FILE* dir_fopen_warn(const char* dir, const char* file, const char* mode)
     FILE* f = dir_fopen(dir, file, mode);
     if (f == NULL)
     {
+        /*
+         * These files are optional first-run runtime files.  A clean install
+         * will not have them yet, so do not spam scary debug warnings when
+         * they are missing during read probes.  Write failures still warn.
+         */
+        if (is_read_only_mode(mode) && is_optional_runtime_file(file))
+            return NULL;
+
         char msg[290];
         strcpy(msg, "warning: failed to open '");
         strncat(msg, file, sizeof(msg) - strlen(msg) - 1);

@@ -41,7 +41,21 @@
 #include <unistd.h>
 #endif
 
- /* Configuration Load/Save handler */
+#ifdef _XBOX
+extern "C"
+{
+	struct XE_ANSI_STRING
+	{
+		unsigned short Length;
+		unsigned short MaximumLength;
+		char* Buffer;
+	};
+
+	extern XE_ANSI_STRING XeImageFileName;
+}
+#endif
+
+/* Configuration Load/Save handler */
 
 const JE_byte cryptKey[10] = /* [1..10] */
 {
@@ -745,9 +759,24 @@ void JE_decryptSaveTemp(void)
 
 const char* get_user_directory(void)
 {
-	// Xbox: config saved to E:\ (HDD partition, always present)
-	return "E:\\";
+#ifdef _XBOX
+	/*
+	 * Original Xbox titles are normally mounted with the running title
+	 * directory exposed as D:\.  For this homebrew port, keep PC-style
+	 * local runtime behavior by writing saves/configs beside default.xbe.
+	 *
+	 * Runtime files:
+	 *   D:\tyrian.sav
+	 *   D:\tyrian.cfg
+	 *   D:\opentyrian.cfg
+	 *   D:\demorec.*
+	 */
+	return "D:\\";
+#else
+	return "";
+#endif
 }
+
 
 // for compatibility
 Uint8 joyButtonAssign[4] = { 1, 4, 5, 5 };
@@ -760,7 +789,7 @@ void JE_loadConfiguration(void)
 	JE_byte* p;
 	int y;
 
-	fi = dir_fopen_warn(get_user_directory(), "tyrian.cfg", "rb");
+	fi = dir_fopen(get_user_directory(), "tyrian.cfg", "rb");
 	if (fi && ftell_eof(fi) == 28)
 	{
 		background2 = 0;
@@ -791,7 +820,11 @@ void JE_loadConfiguration(void)
 	}
 	else
 	{
-		OutputDebugStringA("Invalid or missing TYRIAN.CFG! Using defaults.\n");
+		if (fi)
+		{
+			fclose(fi);
+			OutputDebugStringA("Invalid TYRIAN.CFG; using defaults.\n");
+		}
 
 		soundEffects = 1;
 		memcpy(&dosKeySettings, &defaultDosKeySettings, sizeof(dosKeySettings));

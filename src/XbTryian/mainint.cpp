@@ -1798,9 +1798,6 @@ JE_boolean JE_inGameSetup(void)
 			{
 				JE_playSampleNum(S_SELECT);
 
-#ifdef _XBOX
-				XbTryian_ReturnToDashboard();
-#else
 				if (constantPlay)
 					JE_tyrianHalt(0);
 
@@ -1811,9 +1808,14 @@ JE_boolean JE_inGameSetup(void)
 					playerEndLevel = true;
 				}
 
+				/*
+				 * In-game "Quit" means quit the current level/session and
+				 * return through the normal OpenTyrian menu flow.  Do not
+				 * launch the Xbox dashboard here; only the title-screen Quit
+				 * should exit the XBE.
+				 */
 				result = true;
 				done = true;
-#endif
 				break;
 			}
 			default:
