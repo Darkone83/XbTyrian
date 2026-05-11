@@ -1,4 +1,4 @@
-# XbTryian
+# XbTyrian
 
 <div align=center>
 
@@ -6,7 +6,7 @@
 
 </div>
 
-**XbTryian** is an original Xbox / RXDK conversion of **OpenTyrian**, converted by **darkone83**.
+**XbTyrian** is an original Xbox / RXDK conversion of **OpenTyrian**, converted by **darkone83**.
 
 OpenTyrian is an open-source port of the DOS vertical scrolling shooter **Tyrian**. This project keeps the OpenTyrian foundation intact while adding the Xbox/RXDK platform work needed to run on original Xbox hardware.
 
