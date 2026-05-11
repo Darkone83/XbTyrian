@@ -2,7 +2,7 @@
 
 <div align=center>
 
-<img src="https://github.com/Darkone83/XbTryian/blob/main/img/XbTyrian.png" width=300> <img src="https://github.com/Darkone83/XbTryian/blob/main/img/Darkone83.png" width=400>
+<img src="https://github.com/Darkone83/XbTyrian/blob/main/img/XbTyrain.png" width=300> <img src="https://github.com/Darkone83/XbTryian/blob/main/img/Darkone83.png" width=400>
 
 </div>
 
