@@ -10,6 +10,12 @@
 
 OpenTyrian is an open-source port of the DOS vertical scrolling shooter **Tyrian**. This project keeps the OpenTyrian foundation intact while adding the Xbox/RXDK platform work needed to run on original Xbox hardware.
 
+<div align=center>
+
+<img src="https://github.com/Darkone83/XbTryian/blob/main/img/menu.jpg" width=360> <img src="https://github.com/Darkone83/XbTryian/blob/main/img/game.jpg" width=360>
+
+</div>
+
 Original upstream project:
 
 <https://github.com/opentyrian/opentyrian/>
