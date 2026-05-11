@@ -61,6 +61,7 @@
     <ClCompile Include="vga_palette.cpp" />
     <ClCompile Include="video.cpp" />
     <ClCompile Include="video_scale_stub.cpp" />
+    <ClCompile Include="xbox_config.cpp" />
     <ClCompile Include="xmas.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +123,7 @@
     <ClInclude Include="vga_palette.h" />
     <ClInclude Include="video.h" />
     <ClInclude Include="video_scale.h" />
+    <ClInclude Include="xbox_config.h" />
     <ClInclude Include="xmas.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

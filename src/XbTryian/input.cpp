@@ -224,15 +224,21 @@ WORD GetButtons()
     return g_padButtons[g_activePort];
 }
 
+WORD GetButtonsForPort(int port)
+{
+    if (port < 0 || port >= MAX_PORTS || !g_padHandles[port]) return 0;
+    return g_padButtons[port];
+}
+
 // -----------------------------------------------------------------------------
 // GetSticks – returns left/right analog sticks (with deadzones) from active port
 // -----------------------------------------------------------------------------
-void GetSticks(int& lx, int& ly, int& rx, int& ry)
+static void get_sticks_for_port_internal(int port, int& lx, int& ly, int& rx, int& ry)
 {
     lx = ly = rx = ry = 0;
-    if (g_activePort < 0 || !g_padHandles[g_activePort]) return;
+    if (port < 0 || port >= MAX_PORTS || !g_padHandles[port]) return;
 
-    const XINPUT_GAMEPAD& gp = g_padStates[g_activePort].Gamepad;
+    const XINPUT_GAMEPAD& gp = g_padStates[port].Gamepad;
     lx = gp.sThumbLX;
     ly = gp.sThumbLY;
     rx = gp.sThumbRX;
@@ -243,6 +249,16 @@ void GetSticks(int& lx, int& ly, int& rx, int& ry)
     if (abs(ly) < STICK_DEADZONE) ly = 0;
     if (abs(rx) < STICK_DEADZONE) rx = 0;
     if (abs(ry) < STICK_DEADZONE) ry = 0;
+}
+
+void GetSticks(int& lx, int& ly, int& rx, int& ry)
+{
+    get_sticks_for_port_internal(g_activePort, lx, ly, rx, ry);
+}
+
+void GetSticksForPort(int port, int& lx, int& ly, int& rx, int& ry)
+{
+    get_sticks_for_port_internal(port, lx, ly, rx, ry);
 }
 
 // -----------------------------------------------------------------------------

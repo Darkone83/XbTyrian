@@ -406,7 +406,7 @@ void JE_itemScreen(void)
 				if (x < 10) /* 10 = reset to defaults, 11 = done */
 				{
 					temp2 = (x == curSel[curMenu]) ? 252 : 250;
-					JE_textShade(VGAScreen, 236, 38 + (x - 2) * 12, SDL_GetScancodeName(keySettings[x - 2]), temp2 / 16, temp2 % 16 - 8, DARKEN);
+					JE_textShade(VGAScreen, 236, 38 + (x - 2) * 12, JE_getInputName(keySettings[x - 2]), temp2 / 16, temp2 % 16 - 8, DARKEN);
 				}
 			}
 
@@ -2687,7 +2687,7 @@ void JE_menuFunction(JE_byte select)
 		{
 			temp2 = 254;
 			int tempY = 38 + (curSelect - 2) * 12;
-			JE_textShade(VGAScreen, 236, tempY, SDL_GetScancodeName(keySettings[curSelect - 2]), (temp2 / 16), (temp2 % 16) - 8, DARKEN);
+			JE_textShade(VGAScreen, 236, tempY, JE_getInputName(keySettings[curSelect - 2]), (temp2 / 16), (temp2 % 16) - 8, DARKEN);
 			JE_showVGA();
 
 			wait_noinput(true, true, true);

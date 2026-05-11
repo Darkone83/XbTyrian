@@ -171,6 +171,9 @@
     <ClCompile Include="tyrian2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xbox_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Media\Copy Assets Here.txt">
@@ -344,6 +347,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rxdk_splash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xbox_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

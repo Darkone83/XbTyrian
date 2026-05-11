@@ -45,11 +45,15 @@ void PumpInput();
 // Returns OR of all controller button masks (BTN_* flags above).
 WORD GetButtons();
 
+// Port-specific reads for local multiplayer. Port 0 = player 1, port 1 = player 2.
+WORD GetButtonsForPort(int port);
+
 // Returns left/right stick raw 16-bit values.
 // If no controller present: all zeros.
 //   lx,ly = left stick   (-32768 .. 32767)
 //   rx,ry = right stick  (-32768 .. 32767)
 void GetSticks(int& lx, int& ly, int& rx, int& ry);
+void GetSticksForPort(int port, int& lx, int& ly, int& rx, int& ry);
 void GetRawSticks(int& lx, int& ly, int& rx, int& ry);  // no deadzone — for drift test
 
 // Returns raw analog button values (0..255) for triggers, black/white, and face buttons.

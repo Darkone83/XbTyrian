@@ -117,6 +117,41 @@ static const struct { WORD btn; SDL_Scancode scan; } s_map[] =
 #define S_MAP_COUNT  (sizeof(s_map) / sizeof(s_map[0]))
 
 // =============================================================================
+// JE_getInputName
+//
+// Display-only helper.  The controller still maps through keyboard scancodes;
+// this only changes what Xbox users see in menus/prompts.
+// =============================================================================
+
+const char* JE_getInputName(SDL_Scancode scancode)
+{
+#ifdef _XBOX
+    switch (scancode)
+    {
+    case SDL_SCANCODE_UP:      return "D-PAD UP";
+    case SDL_SCANCODE_DOWN:    return "D-PAD DOWN";
+    case SDL_SCANCODE_LEFT:    return "D-PAD LEFT";
+    case SDL_SCANCODE_RIGHT:   return "D-PAD RIGHT";
+
+    case SDL_SCANCODE_SPACE:   return "A / RT";
+    case SDL_SCANCODE_RETURN:  return "B / START / LT";
+    case SDL_SCANCODE_ESCAPE:  return "BACK";
+    case SDL_SCANCODE_LCTRL:   return "X";
+    case SDL_SCANCODE_LALT:    return "Y";
+    case SDL_SCANCODE_P:       return "WHITE";
+    case SDL_SCANCODE_F1:      return "BLACK";
+    case SDL_SCANCODE_F9:      return "L-THUMB";
+    case SDL_SCANCODE_F10:     return "R-THUMB";
+    default:
+        break;
+    }
+#endif
+
+    return SDL_GetScancodeName(scancode);
+}
+
+
+// =============================================================================
 // init_keyboard
 // =============================================================================
 

@@ -53,9 +53,14 @@ typedef float  JE_real;
 
 #define TYRIAN_VERSION "2.1"
 
-extern const char *opentyrian_str;
-extern const char *opentyrian_version;
+extern const char* opentyrian_str;
+extern const char* opentyrian_version;
 
 void setupMenu(void);
+
+#ifdef _XBOX
+typedef struct SDL_Surface SDL_Surface;
+void xbox_setup_capture_backdrop(SDL_Surface* src, const void* palette);
+#endif
 
 #endif /* OPENTYR_H */

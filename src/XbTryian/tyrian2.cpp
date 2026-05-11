@@ -3638,6 +3638,14 @@ bool titleScreen(void)
 			}
 			case MENU_ITEM_SETUP:
 			{
+#ifdef _XBOX
+				/*
+				 * Capture the already-rendered title screen before fading out.
+				 * The settings menu restores this exact frame/palette as its
+				 * backdrop instead of loading a picture out of normal engine flow.
+				 */
+				xbox_setup_capture_backdrop(VGAScreen, colors);
+#endif
 				fade_black(15);
 
 				setupMenu();

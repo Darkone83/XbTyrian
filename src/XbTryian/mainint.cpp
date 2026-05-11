@@ -30,6 +30,7 @@
 #include "helptext.h"
 #include "joystick.h"
 #include "keyboard.h"
+#include "input.h"
 #include "lds_play.h"
 #include "loudness.h"
 #include "menus.h"
@@ -71,6 +72,45 @@ JE_boolean useLastBank; /* See if I want to use the last 16 colors for DisplayTe
 
 bool pause_pressed = false, ingamemenu_pressed = false;
 
+#ifdef _XBOX
+#define XBOX_P2_STICK_THRESHOLD 16000
+
+static void JE_applyXboxP2ControllerInput(Player* this_player, bool buttonState[4])
+{
+	if (!twoPlayerMode || !IsPortConnected(1))
+		return;
+
+	WORD buttons = GetButtonsForPort(1);
+
+	int lx, ly, rx, ry;
+	GetSticksForPort(1, lx, ly, rx, ry);
+
+	if ((buttons & BTN_DPAD_UP) || ly > XBOX_P2_STICK_THRESHOLD)
+		this_player->y -= CURRENT_KEY_SPEED;
+	if ((buttons & BTN_DPAD_DOWN) || ly < -XBOX_P2_STICK_THRESHOLD)
+		this_player->y += CURRENT_KEY_SPEED;
+	if ((buttons & BTN_DPAD_LEFT) || lx < -XBOX_P2_STICK_THRESHOLD)
+		this_player->x -= CURRENT_KEY_SPEED;
+	if ((buttons & BTN_DPAD_RIGHT) || lx > XBOX_P2_STICK_THRESHOLD)
+		this_player->x += CURRENT_KEY_SPEED;
+
+	/*
+	 * Mirror P1's physical Xbox layout, but route it directly to player 2's
+	 * local gameplay buttons instead of the global keysactive[] keyboard shim.
+	 *
+	 * A / RT          = fire
+	 * B / START / LT  = change fire
+	 * X               = left sidekick
+	 * Y               = right sidekick
+	 */
+	buttonState[0] = buttonState[0] || ((buttons & (BTN_A | BTN_RTRIG)) != 0);
+	buttonState[3] = buttonState[3] || ((buttons & (BTN_B | BTN_START | BTN_LTRIG)) != 0);
+	buttonState[1] = buttonState[1] || ((buttons & BTN_X) != 0);
+	buttonState[2] = buttonState[2] || ((buttons & BTN_Y) != 0);
+}
+#endif
+
+
 // XDK-safe float-to-int helper.
 // Avoids MSVC emitting the incompatible __ftol2_sse runtime helper.
 static __inline int mainint_ftoi(float x)
@@ -89,6 +129,37 @@ static void XbTryian_ReturnToDashboard(void)
 	// Fallback only if launch fails/returns.
 	for (;;)
 		Sleep(1000);
+}
+#endif
+
+#ifdef _XBOX
+static WORD JE_xboxAnyControllerButtons(void)
+{
+	PumpInput();
+
+	WORD buttons = 0;
+	for (int port = 0; port < 4; ++port)
+		buttons |= GetButtonsForPort(port);
+
+	return buttons;
+}
+
+static void JE_xboxWaitControllerButtonsReleased(void)
+{
+	for (;;)
+	{
+		service_SDL_events(false);
+
+		if (JE_xboxAnyControllerButtons() == 0)
+			break;
+
+		Sleep(16);
+	}
+
+	newkey = false;
+	newmouse = false;
+	keysactive[SDL_SCANCODE_P] = false;
+	keysactive[SDL_SCANCODE_ESCAPE] = false;
 }
 #endif
 
@@ -601,7 +672,7 @@ static bool helpSystemPage(Uint8* topic, bool* restart)
 // cost to upgrade a weapon power from power-1 (where power == 0 indicates an unupgraded weapon)
 long weapon_upgrade_cost(long base_cost, unsigned int power)
 {
-	assert(power <= 11);
+	if (power > 11) { OutputDebugStringA("weapon_upgrade_cost: power clamped to 11\n"); power = 11; }
 
 	unsigned int temp = 0;
 
@@ -1508,6 +1579,19 @@ JE_boolean JE_inGameSetup(void)
 	SDL_Surface* temp_surface = VGAScreen;
 	VGAScreen = VGAScreenSeg; /* side-effect of game_screen */
 
+	/*
+	 * Keep a clean copy of the gameplay frame before drawing the in-game menu.
+	 * The menu darkens the background with JE_barShade().  Without restoring
+	 * this clean frame on exit, reopening the menu darkens the already-darkened
+	 * frame again, making the menu appear increasingly opaque.
+	 */
+	static JE_byte xboxMenuRestore[320 * 200];
+	const size_t xboxMenuRestoreBytes = (size_t)VGAScreen->pitch * VGAScreen->h;
+	const bool xboxMenuRestoreValid = xboxMenuRestoreBytes <= sizeof(xboxMenuRestore);
+
+	if (xboxMenuRestoreValid)
+		memcpy(xboxMenuRestore, VGAScreen->pixels, xboxMenuRestoreBytes);
+
 	enum MenuItemIndex
 	{
 		MENU_ITEM_MUSIC_VOLUME = 0,
@@ -1904,6 +1988,9 @@ JE_boolean JE_inGameSetup(void)
 		}
 	}
 
+	if (xboxMenuRestoreValid)
+		memcpy(VGAScreen->pixels, xboxMenuRestore, xboxMenuRestoreBytes);
+
 	VGAScreen = temp_surface; /* side-effect of game_screen */
 
 	return result;
@@ -2260,7 +2347,8 @@ void adjust_difficulty(void)
 		3,     // Nortaneous
 	};
 
-	assert(initialDifficulty > 0 && initialDifficulty < 10);
+	if (initialDifficulty == 0) { OutputDebugStringA("JE_updateDifficulty: difficulty clamped from 0 to 1\n"); initialDifficulty = 1; }
+	if (initialDifficulty >= 10) { OutputDebugStringA("JE_updateDifficulty: difficulty clamped to 9\n"); initialDifficulty = 9; }
 
 	const ulong score = twoPlayerMode ? (player[0].cash + player[1].cash) : JE_totalScore(&player[0]),
 		adjusted_score = mainint_ftoi(score * score_multiplier[initialDifficulty]);
@@ -2880,7 +2968,7 @@ bool str_pop_int(char* str, int* val)
 	bool success = false;
 
 	char buf[256];
-	assert(strlen(str) < sizeof(buf));
+	if (strlen(str) >= sizeof(buf)) { OutputDebugStringA("str_pop_int: string truncated\n"); str[sizeof(buf) - 1] = '\0'; }
 
 	// grab the value from str
 	char* end;
@@ -3392,6 +3480,15 @@ void JE_pauseGame(void)
 
 	wait_noinput(false, false, true); // TODO: should up the joystick repeat temporarily instead
 
+#ifdef _XBOX
+	/*
+	 * Pause must be edge-triggered on Xbox.  The controller-to-keyboard shim can
+	 * keep WHITE/P active long enough that the original PC pause loop instantly
+	 * sees another key event and exits, making pause appear to flicker rapidly.
+	 */
+	JE_xboxWaitControllerButtonsReleased();
+#endif
+
 	do
 	{
 		setDelay(2);
@@ -3399,8 +3496,12 @@ void JE_pauseGame(void)
 		push_joysticks_as_keyboard();
 		service_SDL_events(true);
 
+#ifdef _XBOX
+		if (JE_xboxAnyControllerButtons() != 0)
+#else
 		if ((newkey && lastkey_scan != SDL_SCANCODE_LCTRL && lastkey_scan != SDL_SCANCODE_RCTRL && lastkey_scan != SDL_SCANCODE_LALT && lastkey_scan != SDL_SCANCODE_RALT) ||
 			JE_mousePosition(&mouseX, &mouseY) > 0)
+#endif
 		{
 #ifdef WITH_NETWORK
 			if (isNetworkGame)
@@ -3443,6 +3544,11 @@ void JE_pauseGame(void)
 #endif
 
 	set_volume(tyrMusicVolume, fxVolume);
+
+#ifdef _XBOX
+	JE_xboxWaitControllerButtonsReleased();
+	pause_pressed = false;
+#endif
 
 	//skipStarShowVGA = true;
 
@@ -3491,6 +3597,12 @@ redo:
 
 	bool link_gun_analog = false;
 	float link_gun_angle = 0;
+
+#ifdef _XBOX
+	const bool xboxDirectP2 = twoPlayerMode && playerNum_ == 2 && !isNetworkGame && !play_demo && !record_demo;
+#else
+	const bool xboxDirectP2 = false;
+#endif
 
 	/* Draw Player */
 	if (!this_player->is_alive)
@@ -3682,7 +3794,7 @@ redo:
 				}
 
 				/* keyboard input */
-				if ((inputDevice == 0 || inputDevice == 1) && !play_demo)
+				if ((inputDevice == 0 || inputDevice == 1) && !play_demo && !xboxDirectP2)
 				{
 					if (keysactive[keySettings[KEY_SETTING_UP]])
 						this_player->y -= CURRENT_KEY_SPEED;
@@ -3737,6 +3849,13 @@ redo:
 						}
 					}
 				}
+
+#ifdef _XBOX
+				if (xboxDirectP2)
+				{
+					JE_applyXboxP2ControllerInput(this_player, button);
+				}
+#endif
 
 				if (smoothies[9 - 1])
 				{

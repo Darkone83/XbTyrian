@@ -34,33 +34,34 @@ typedef enum {
 	ScalingMode_MAX
 } ScalingMode;
 
-extern const char *const scaling_mode_names[ScalingMode_MAX];
+extern const char* const scaling_mode_names[ScalingMode_MAX];
 
 extern int fullscreen_display; // -1 means windowed
 extern ScalingMode scaling_mode;
 
-extern SDL_Surface *VGAScreen, *VGAScreenSeg;
-extern SDL_Surface *game_screen;
-extern SDL_Surface *VGAScreen2;
+extern SDL_Surface* VGAScreen, * VGAScreenSeg;
+extern SDL_Surface* game_screen;
+extern SDL_Surface* VGAScreen2;
 
-extern SDL_Window *main_window;
-extern SDL_PixelFormat *main_window_tex_format;
+extern SDL_Window* main_window;
+extern SDL_PixelFormat* main_window_tex_format;
 
 void init_video(void);
+void video_apply_settings(int aspectMode, int scanlines, int textureFilter, int brightness);
 
 void video_on_win_resize(void);
 void reinit_fullscreen(int new_display);
 void toggle_fullscreen(void);
 bool init_scaler(unsigned int new_scaler);
-bool set_scaling_mode_by_name(const char *name);
+bool set_scaling_mode_by_name(const char* name);
 
 void deinit_video(void);
 
-void JE_clr256(SDL_Surface *);
+void JE_clr256(SDL_Surface*);
 void JE_showVGA(void);
 
-void mapScreenPointToWindow(Sint32 *inout_x, Sint32 *inout_y);
-void mapWindowPointToScreen(Sint32 *inout_x, Sint32 *inout_y);
-void scaleWindowDistanceToScreen(Sint32 *inout_x, Sint32 *inout_y);
+void mapScreenPointToWindow(Sint32* inout_x, Sint32* inout_y);
+void mapWindowPointToScreen(Sint32* inout_x, Sint32* inout_y);
+void scaleWindowDistanceToScreen(Sint32* inout_x, Sint32* inout_y);
 
 #endif /* VIDEO_H */
