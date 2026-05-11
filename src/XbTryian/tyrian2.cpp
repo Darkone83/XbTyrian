@@ -42,6 +42,7 @@
 #include "opentyr.h"
 #include "opentyrian_version.h"
 #include "darkone83_splash.h"
+#include "rxdk_splash.h"
 #include "params.h"
 #include "pcxload.h"
 #include "pcxmast.h"
@@ -3808,6 +3809,140 @@ void newSuperTyrianGame(void)
 }
 
 
+
+static void JE_showRXDKSplash(void)
+{
+#ifdef _XBOX
+	struct SplashVertex
+	{
+		float x, y, z, rhw;
+		float u, v;
+	};
+
+#define RXDK_SPLASH_FVF (D3DFVF_XYZRHW | D3DFVF_TEX1)
+
+	static const SplashVertex quad[4] =
+	{
+		{   0.0f,   0.0f, 0.0f, 1.0f,   0.0f,   0.0f },
+		{ 640.0f,   0.0f, 0.0f, 1.0f, 640.0f,   0.0f },
+		{   0.0f, 480.0f, 0.0f, 1.0f,   0.0f, 480.0f },
+		{ 640.0f, 480.0f, 0.0f, 1.0f, 640.0f, 480.0f },
+	};
+
+	D3DTexture* splashTex = D3DDevice_CreateTexture2(
+		RXDK_SPLASH_WIDTH,
+		RXDK_SPLASH_HEIGHT,
+		1,
+		1,
+		0,
+		D3DFMT_LIN_X8R8G8B8,
+		D3DRTYPE_TEXTURE
+	);
+
+	if (splashTex == NULL)
+		return;
+
+	D3DDevice_SetRenderState(D3DRS_ZENABLE, FALSE);
+	D3DDevice_SetRenderState(D3DRS_LIGHTING, FALSE);
+	D3DDevice_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	D3DDevice_SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+
+	D3DDevice_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	D3DDevice_SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	D3DDevice_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	D3DDevice_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_POINT);
+	D3DDevice_SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
+	D3DDevice_SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_NONE);
+	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+	D3DDevice_SetVertexShader(RXDK_SPLASH_FVF);
+
+	for (int phase = 0; phase < 3; ++phase)
+	{
+		const int frames = (phase == 1) ? 1 : 16;
+
+		for (int frame = 0; frame < frames; ++frame)
+		{
+			int brightness;
+
+			if (phase == 0)
+				brightness = frame * 16;
+			else if (phase == 1)
+				brightness = 255;
+			else
+				brightness = 255 - (frame * 16);
+
+			if (brightness < 0)
+				brightness = 0;
+			if (brightness > 255)
+				brightness = 255;
+
+			D3DLOCKED_RECT lr;
+			if (FAILED(splashTex->LockRect(0, &lr, NULL, 0)))
+			{
+				splashTex->Release();
+				return;
+			}
+
+			unsigned int* dstBase = (unsigned int*)lr.pBits;
+			const int dstPitch = lr.Pitch / sizeof(unsigned int);
+			int x = 0;
+			int y = 0;
+
+			for (unsigned int i = 0; i < RXDK_SPLASH_RLE_COUNT; ++i)
+			{
+				unsigned int count = rxdk_splash_rle[i].count;
+				const unsigned int c = rxdk_splash_rle[i].color;
+
+				unsigned int r = ((c >> 11) & 0x1f);
+				unsigned int g = ((c >> 5) & 0x3f);
+				unsigned int b = (c & 0x1f);
+
+				r = ((r << 3) | (r >> 2));
+				g = ((g << 2) | (g >> 4));
+				b = ((b << 3) | (b >> 2));
+
+				r = (r * brightness) >> 8;
+				g = (g * brightness) >> 8;
+				b = (b * brightness) >> 8;
+
+				const unsigned int out = (r << 16) | (g << 8) | b;
+
+				while (count > 0 && y < RXDK_SPLASH_HEIGHT)
+				{
+					dstBase[y * dstPitch + x] = out;
+
+					++x;
+					if (x >= RXDK_SPLASH_WIDTH)
+					{
+						x = 0;
+						++y;
+					}
+
+					--count;
+				}
+			}
+
+			splashTex->UnlockRect(0);
+
+			D3DDevice_SetTexture(0, splashTex);
+			D3DDevice_DrawVerticesUP(D3DPT_TRIANGLESTRIP, 4, quad, sizeof(SplashVertex));
+			D3DDevice_Swap(0);
+
+			if (phase == 1)
+				Sleep(1500);
+			else
+				Sleep(33);
+		}
+	}
+
+	splashTex->Release();
+	D3DDevice_SetTexture(0, NULL);
+
+#undef RXDK_SPLASH_FVF
+#endif
+}
+
 static void JE_showDarkone83Splash(void)
 {
 #ifdef _XBOX
@@ -3943,6 +4078,7 @@ static void JE_showDarkone83Splash(void)
 
 void intro_logos(void)
 {
+	JE_showRXDKSplash();
 	JE_showDarkone83Splash();
 	moveTyrianLogoUp = true;
 
