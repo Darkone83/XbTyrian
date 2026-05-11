@@ -130,7 +130,7 @@
     <ProjectGuid>{5d2e2d45-5ac9-4924-9416-6f6b92274f15}</ProjectGuid>
     <RootNamespace>XbTryian</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>XbTryian</ProjectName>
+    <ProjectName>XbTyrian</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
