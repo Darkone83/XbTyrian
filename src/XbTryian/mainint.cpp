@@ -161,6 +161,41 @@ static void JE_xboxWaitControllerButtonsReleased(void)
 	keysactive[SDL_SCANCODE_P] = false;
 	keysactive[SDL_SCANCODE_ESCAPE] = false;
 }
+
+static JE_char JE_xboxCycleTextChar(JE_char c, int direction)
+{
+	static const char chars[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-";
+	int index = 0;
+
+	for (int i = 0; chars[i] != '\0'; ++i)
+	{
+		if (chars[i] == c)
+		{
+			index = i;
+			break;
+		}
+	}
+
+	const int count = (int)sizeof(chars) - 1;
+
+	if (direction > 0)
+		index = (index + 1) % count;
+	else
+		index = (index + count - 1) % count;
+
+	return chars[index];
+}
+
+static void JE_xboxDeleteTextChar(char* text, int maxLen, int cursor)
+{
+	if (cursor < 0 || cursor >= maxLen)
+		return;
+
+	for (int i = cursor; i < maxLen - 1; ++i)
+		text[i] = text[i + 1];
+
+	text[maxLen - 1] = ' ';
+}
 #endif
 
 /* Draws a message at the bottom text window on the playing screen */
@@ -2165,6 +2200,12 @@ void JE_highScoreCheck(void)
 				strcpy(stemp, "                             ");
 				temp = 0;
 
+#ifdef _XBOX
+				WORD prevButtons = 0;
+				WORD pressedButtons = 0;
+				JE_xboxWaitControllerButtonsReleased();
+#endif
+
 				JE_barShade(VGAScreen, 65, 55, 255, 155);
 
 				do
@@ -2197,12 +2238,19 @@ void JE_highScoreCheck(void)
 						flash = (flash == 8 * 16 + 10) ? 8 * 16 + 2 : 8 * 16 + 10;
 						temp3 = (temp3 == 6) ? 2 : 6;
 
-						strncpy(tempstr, stemp, temp);
-						tempstr[temp] = '\0';
+						strncpy(tempstr, stemp, 28);
+						tempstr[28] = '\0';
 						JE_outText(VGAScreen, 65, 89, tempstr, 8, 3);
+
+						// Non-destructive cursor underline. Do not cover the selected character.
 						tempW = 65 + JE_textWidth(tempstr, TINY_FONT);
-						JE_barShade(VGAScreen, tempW + 2, 90, tempW + 6, 95);
-						fill_rectangle_xy(VGAScreen, tempW + 1, 89, tempW + 5, 94, flash);
+						{
+							char cursorText[30];
+							strncpy(cursorText, stemp, temp);
+							cursorText[temp] = '\0';
+							const int cursorX = 65 + JE_textWidth(cursorText, TINY_FONT);
+							JE_rectangle(VGAScreen, cursorX, 97, cursorX + 6, 98, flash);
+						}
 
 						for (int i = 0; i < 14; i++)
 						{
@@ -2217,67 +2265,137 @@ void JE_highScoreCheck(void)
 							}
 							JE_mouseReplace();
 
+#ifdef _XBOX
+							PumpInput();
+							{
+								WORD buttons = GetButtons();
+								pressedButtons = buttons & ~prevButtons;
+								prevButtons = buttons;
+							}
+							if (pressedButtons)
+								break;
+#else
 							push_joysticks_as_keyboard();
+#endif
 							service_wait_delay();
 
 							if (newkey || newmouse)
 								break;
 						}
 
-					} while (!newkey && !newmouse && !new_text);
+#ifdef _XBOX
+					} while (!newkey && !newmouse && !new_text && !pressedButtons);
+#else
+				} while (!newkey && !newmouse && !new_text);
+#endif
 
 					if (!playing)
 						play_song(31);
 
-					if (mouseButton > 0)
+#ifdef _XBOX
+					if (pressedButtons)
 					{
-						if (mouseX > 56 && mouseX < 142 && mouseY > 123 && mouseY < 149)
+						if (pressedButtons & BTN_DPAD_LEFT)
+						{
+							if (temp > 0)
+							{
+								--temp;
+								JE_playSampleNum(S_CURSOR);
+							}
+						}
+						else if (pressedButtons & BTN_DPAD_RIGHT)
+						{
+							if (temp < 27)
+							{
+								++temp;
+								JE_playSampleNum(S_CURSOR);
+							}
+						}
+						else if (pressedButtons & BTN_DPAD_UP)
+						{
+							stemp[temp] = JE_xboxCycleTextChar(stemp[temp], 1);
+							JE_playSampleNum(S_CURSOR);
+						}
+						else if (pressedButtons & BTN_DPAD_DOWN)
+						{
+							stemp[temp] = JE_xboxCycleTextChar(stemp[temp], -1);
+							JE_playSampleNum(S_CURSOR);
+						}
+						else if (pressedButtons & BTN_X)
+						{
+							stemp[temp] = ' ';
+							JE_playSampleNum(S_CURSOR);
+						}
+						else if (pressedButtons & BTN_Y)
+						{
+							JE_xboxDeleteTextChar(stemp, 28, temp);
+							JE_playSampleNum(S_CLICK);
+						}
+						else if (pressedButtons & (BTN_A | BTN_START))
 						{
 							quit = true;
+							JE_playSampleNum(S_SELECT);
 						}
-						else if (mouseX > 151 && mouseX < 237 && mouseY > 123 && mouseY < 149)
+						else if (pressedButtons & (BTN_B | BTN_BACK))
 						{
 							quit = true;
 							cancel = true;
+							JE_playSampleNum(S_SPRING);
 						}
+
+						pressedButtons = 0;
 					}
-					else if (new_text)
-					{
-						for (size_t ti = 0U; last_text[ti] != '\0'; ++ti)
+					else
+#endif
+						if (mouseButton > 0)
 						{
-							const char c = (unsigned char)last_text[ti] <= 127U ? toupper(last_text[ti]) : 0;
-							if ((c == ' ' || font_ascii[(unsigned char)c] != -1) &&
-								temp < 28)
+							if (mouseX > 56 && mouseX < 142 && mouseY > 123 && mouseY < 149)
 							{
-								stemp[temp] = c;
-								temp += 1;
+								quit = true;
+							}
+							else if (mouseX > 151 && mouseX < 237 && mouseY > 123 && mouseY < 149)
+							{
+								quit = true;
+								cancel = true;
 							}
 						}
-					}
-					else if (newkey)
-					{
-						switch (lastkey_scan)
+						else if (new_text)
 						{
-						case SDL_SCANCODE_BACKSPACE:
-						case SDL_SCANCODE_DELETE:
-							if (temp)
+							for (size_t ti = 0U; last_text[ti] != '\0'; ++ti)
 							{
-								temp--;
-								stemp[temp] = ' ';
+								const char c = (unsigned char)last_text[ti] <= 127U ? toupper(last_text[ti]) : 0;
+								if ((c == ' ' || font_ascii[(unsigned char)c] != -1) &&
+									temp < 28)
+								{
+									stemp[temp] = c;
+									temp += 1;
+								}
 							}
-							break;
-						case SDL_SCANCODE_ESCAPE:
-							quit = true;
-							cancel = true;
-							break;
-						case SDL_SCANCODE_RETURN:
-							quit = true;
-							break;
-						default:
-							break;
 						}
-					}
-				} while (!quit);
+						else if (newkey)
+						{
+							switch (lastkey_scan)
+							{
+							case SDL_SCANCODE_BACKSPACE:
+							case SDL_SCANCODE_DELETE:
+								if (temp)
+								{
+									temp--;
+									stemp[temp] = ' ';
+								}
+								break;
+							case SDL_SCANCODE_ESCAPE:
+								quit = true;
+								cancel = true;
+								break;
+							case SDL_SCANCODE_RETURN:
+								quit = true;
+								break;
+							default:
+								break;
+							}
+						}
+			} while (!quit);
 
 				if (!cancel)
 				{
@@ -2324,10 +2442,10 @@ void JE_highScoreCheck(void)
 					wait_input(true, true, true);
 
 				fade_black(15);
-			}
-
 		}
+
 	}
+}
 }
 
 // increases game difficulty based on player's total score / total of players' scores
@@ -3012,6 +3130,12 @@ void JE_operation(JE_byte slot)
 
 		wait_noinput(false, true, false);
 
+#ifdef _XBOX
+		WORD prevButtons = 0;
+		WORD pressedButtons = 0;
+		JE_xboxWaitControllerButtonsReleased();
+#endif
+
 		JE_barShade(VGAScreen, 65, 55, 255, 155);
 
 		bool quit = false;
@@ -3030,11 +3154,17 @@ void JE_operation(JE_byte slot)
 				temp3 = (temp3 == 6) ? 2 : 6;
 
 				strcpy(tempStr, miscText[2 - 1]);
-				strncat(tempStr, stemp, temp);
+				strncat(tempStr, stemp, 14);
 				JE_outText(VGAScreen, 65, 89, tempStr, 8, 3);
-				tempW = 65 + JE_textWidth(tempStr, TINY_FONT);
-				JE_barShade(VGAScreen, tempW + 2, 90, tempW + 6, 95);
-				fill_rectangle_xy(VGAScreen, tempW + 1, 89, tempW + 5, 94, flash);
+
+				// Non-destructive cursor underline. Do not cover the selected character.
+				{
+					char cursorText[51];
+					strcpy(cursorText, miscText[2 - 1]);
+					strncat(cursorText, stemp, temp);
+					const int cursorX = 65 + JE_textWidth(cursorText, TINY_FONT);
+					JE_rectangle(VGAScreen, cursorX, 97, cursorX + 6, 98, flash);
+				}
 
 				int text_x = 54 + 45 - (JE_textWidth(miscText[9], FONT_SHAPES) / 2);
 				JE_outTextAdjust(VGAScreen, text_x, 128, miscText[9], 15, -5, FONT_SHAPES, true);
@@ -3046,7 +3176,18 @@ void JE_operation(JE_byte slot)
 				{
 					setDelay(1);
 
+#ifdef _XBOX
+					PumpInput();
+					{
+						WORD buttons = GetButtons();
+						pressedButtons = buttons & ~prevButtons;
+						prevButtons = buttons;
+					}
+					if (pressedButtons)
+						break;
+#else
 					push_joysticks_as_keyboard();
+#endif
 					service_wait_delay();
 
 					JE_mouseStart();
@@ -3056,64 +3197,123 @@ void JE_operation(JE_byte slot)
 					if (newkey || newmouse || new_text)
 						break;
 				}
-			} while (!newkey && !newmouse && !new_text);
+#ifdef _XBOX
+			} while (!newkey && !newmouse && !new_text && !pressedButtons);
+#else
+		} while (!newkey && !newmouse && !new_text);
+#endif
 
-			if (mouseButton > 0)
+#ifdef _XBOX
+			if (pressedButtons)
 			{
-				if (lastmouse_x > 56 && lastmouse_x < 142 && lastmouse_y > 123 && lastmouse_y < 149)
+				if (pressedButtons & BTN_DPAD_LEFT)
 				{
-					quit = true;
-					JE_saveGame(slot, stemp);
-					JE_playSampleNum(S_SELECT);
-				}
-				else if (lastmouse_x > 151 && lastmouse_x < 237 && lastmouse_y > 123 && lastmouse_y < 149)
-				{
-					quit = true;
-					JE_playSampleNum(S_SPRING);
-				}
-			}
-			else if (new_text)
-			{
-				for (size_t ti = 0U; last_text[ti] != '\0'; ++ti)
-				{
-					const char c = (unsigned char)last_text[ti] <= 127U ? toupper(last_text[ti]) : 0;
-					if ((c == ' ' || font_ascii[(unsigned char)c] != -1) &&
-						temp < 14)
+					if (temp > 0)
 					{
+						--temp;
 						JE_playSampleNum(S_CURSOR);
-						stemp[temp] = c;
-						temp += 1;
 					}
 				}
-			}
-			else if (newkey)
-			{
-				switch (lastkey_scan)
+				else if (pressedButtons & BTN_DPAD_RIGHT)
 				{
-				case SDL_SCANCODE_BACKSPACE:
-				case SDL_SCANCODE_DELETE:
-					if (temp)
+					if (temp < 13)
 					{
-						temp--;
-						stemp[temp] = ' ';
-						JE_playSampleNum(S_CLICK);
+						++temp;
+						JE_playSampleNum(S_CURSOR);
 					}
-					break;
-				case SDL_SCANCODE_ESCAPE:
-					quit = true;
-					JE_playSampleNum(S_SPRING);
-					break;
-				case SDL_SCANCODE_RETURN:
+				}
+				else if (pressedButtons & BTN_DPAD_UP)
+				{
+					stemp[temp] = JE_xboxCycleTextChar(stemp[temp], 1);
+					JE_playSampleNum(S_CURSOR);
+				}
+				else if (pressedButtons & BTN_DPAD_DOWN)
+				{
+					stemp[temp] = JE_xboxCycleTextChar(stemp[temp], -1);
+					JE_playSampleNum(S_CURSOR);
+				}
+				else if (pressedButtons & BTN_X)
+				{
+					stemp[temp] = ' ';
+					JE_playSampleNum(S_CURSOR);
+				}
+				else if (pressedButtons & BTN_Y)
+				{
+					JE_xboxDeleteTextChar(stemp, 14, temp);
+					JE_playSampleNum(S_CLICK);
+				}
+				else if (pressedButtons & (BTN_A | BTN_START))
+				{
 					quit = true;
 					JE_saveGame(slot, stemp);
 					JE_playSampleNum(S_SELECT);
-					break;
-				default:
-					break;
 				}
+				else if (pressedButtons & (BTN_B | BTN_BACK))
+				{
+					quit = true;
+					JE_playSampleNum(S_SPRING);
+				}
+
+				pressedButtons = 0;
 			}
-		}
+			else
+#endif
+				if (mouseButton > 0)
+				{
+					if (lastmouse_x > 56 && lastmouse_x < 142 && lastmouse_y > 123 && lastmouse_y < 149)
+					{
+						quit = true;
+						JE_saveGame(slot, stemp);
+						JE_playSampleNum(S_SELECT);
+					}
+					else if (lastmouse_x > 151 && lastmouse_x < 237 && lastmouse_y > 123 && lastmouse_y < 149)
+					{
+						quit = true;
+						JE_playSampleNum(S_SPRING);
+					}
+				}
+				else if (new_text)
+				{
+					for (size_t ti = 0U; last_text[ti] != '\0'; ++ti)
+					{
+						const char c = (unsigned char)last_text[ti] <= 127U ? toupper(last_text[ti]) : 0;
+						if ((c == ' ' || font_ascii[(unsigned char)c] != -1) &&
+							temp < 14)
+						{
+							JE_playSampleNum(S_CURSOR);
+							stemp[temp] = c;
+							temp += 1;
+						}
+					}
+				}
+				else if (newkey)
+				{
+					switch (lastkey_scan)
+					{
+					case SDL_SCANCODE_BACKSPACE:
+					case SDL_SCANCODE_DELETE:
+						if (temp)
+						{
+							temp--;
+							stemp[temp] = ' ';
+							JE_playSampleNum(S_CLICK);
+						}
+						break;
+					case SDL_SCANCODE_ESCAPE:
+						quit = true;
+						JE_playSampleNum(S_SPRING);
+						break;
+					case SDL_SCANCODE_RETURN:
+						quit = true;
+						JE_saveGame(slot, stemp);
+						JE_playSampleNum(S_SELECT);
+						break;
+					default:
+						break;
+					}
+				}
 	}
+}
 
 	wait_noinput(false, true, false);
 }
