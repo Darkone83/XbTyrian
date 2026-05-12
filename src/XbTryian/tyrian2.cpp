@@ -3818,24 +3818,84 @@ void newSuperTyrianGame(void)
 
 
 
+
+#ifdef _XBOX
+struct XbTyrianSplashVertex
+{
+	float x, y, z, rhw;
+	float u, v;
+};
+
+#define XBTYRIAN_SPLASH_FVF (D3DFVF_XYZRHW | D3DFVF_TEX1)
+
+extern int g_bbWidth;
+extern int g_bbHeight;
+extern int g_aspectStretch;
+
+static void XbTyrian_BuildSplashQuad(XbTyrianSplashVertex quad[4], int srcW, int srcH)
+{
+	float qx0, qy0, qx1, qy1;
+
+	/*
+	 * Keep splash presentation tied to the actual Xbox backbuffer.
+	 * Stretch mode fills the whole output; all other modes use a centered 4:3
+	 * rectangle so 720p becomes 960x720 inside 1280x720 instead of a 640x480
+	 * hardcoded quad.
+	 */
+	if (g_aspectStretch == 1)
+	{
+		qx0 = 0.0f;
+		qy0 = 0.0f;
+		qx1 = (float)g_bbWidth;
+		qy1 = (float)g_bbHeight;
+	}
+	else
+	{
+		float targetH = (float)g_bbHeight;
+		float targetW = targetH * 4.0f / 3.0f;
+
+		if (targetW > (float)g_bbWidth)
+		{
+			targetW = (float)g_bbWidth;
+			targetH = targetW * 3.0f / 4.0f;
+		}
+
+		qx0 = ((float)g_bbWidth - targetW) * 0.5f;
+		qy0 = ((float)g_bbHeight - targetH) * 0.5f;
+		qx1 = qx0 + targetW;
+		qy1 = qy0 + targetH;
+	}
+
+	quad[0].x = qx0; quad[0].y = qy0; quad[0].z = 0.0f; quad[0].rhw = 1.0f; quad[0].u = 0.0f;        quad[0].v = 0.0f;
+	quad[1].x = qx1; quad[1].y = qy0; quad[1].z = 0.0f; quad[1].rhw = 1.0f; quad[1].u = (float)srcW; quad[1].v = 0.0f;
+	quad[2].x = qx0; quad[2].y = qy1; quad[2].z = 0.0f; quad[2].rhw = 1.0f; quad[2].u = 0.0f;        quad[2].v = (float)srcH;
+	quad[3].x = qx1; quad[3].y = qy1; quad[3].z = 0.0f; quad[3].rhw = 1.0f; quad[3].u = (float)srcW; quad[3].v = (float)srcH;
+}
+
+static void XbTyrian_SetSplashRenderState(void)
+{
+	D3DDevice_SetRenderState(D3DRS_ZENABLE, FALSE);
+	D3DDevice_SetRenderState(D3DRS_LIGHTING, FALSE);
+	D3DDevice_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	D3DDevice_SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+
+	D3DDevice_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	D3DDevice_SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	D3DDevice_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	D3DDevice_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_POINT);
+	D3DDevice_SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
+	D3DDevice_SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_NONE);
+	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+	D3DDevice_SetVertexShader(XBTYRIAN_SPLASH_FVF);
+}
+#endif
+
 static void JE_showRXDKSplash(void)
 {
 #ifdef _XBOX
-	struct SplashVertex
-	{
-		float x, y, z, rhw;
-		float u, v;
-	};
-
-#define RXDK_SPLASH_FVF (D3DFVF_XYZRHW | D3DFVF_TEX1)
-
-	static const SplashVertex quad[4] =
-	{
-		{   0.0f,   0.0f, 0.0f, 1.0f,   0.0f,   0.0f },
-		{ 640.0f,   0.0f, 0.0f, 1.0f, 640.0f,   0.0f },
-		{   0.0f, 480.0f, 0.0f, 1.0f,   0.0f, 480.0f },
-		{ 640.0f, 480.0f, 0.0f, 1.0f, 640.0f, 480.0f },
-	};
+	XbTyrianSplashVertex quad[4];
+	XbTyrian_BuildSplashQuad(quad, RXDK_SPLASH_WIDTH, RXDK_SPLASH_HEIGHT);
 
 	D3DTexture* splashTex = D3DDevice_CreateTexture2(
 		RXDK_SPLASH_WIDTH,
@@ -3850,20 +3910,7 @@ static void JE_showRXDKSplash(void)
 	if (splashTex == NULL)
 		return;
 
-	D3DDevice_SetRenderState(D3DRS_ZENABLE, FALSE);
-	D3DDevice_SetRenderState(D3DRS_LIGHTING, FALSE);
-	D3DDevice_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	D3DDevice_SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-
-	D3DDevice_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	D3DDevice_SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	D3DDevice_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	D3DDevice_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_POINT);
-	D3DDevice_SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
-	D3DDevice_SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_NONE);
-	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
-	D3DDevice_SetVertexShader(RXDK_SPLASH_FVF);
+	XbTyrian_SetSplashRenderState();
 
 	for (int phase = 0; phase < 3; ++phase)
 	{
@@ -3933,8 +3980,12 @@ static void JE_showRXDKSplash(void)
 
 			splashTex->UnlockRect(0);
 
+			D3DDevice_BeginScene();
+			D3DDevice_Clear(0, NULL, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0);
+			XbTyrian_SetSplashRenderState();
 			D3DDevice_SetTexture(0, splashTex);
-			D3DDevice_DrawVerticesUP(D3DPT_TRIANGLESTRIP, 4, quad, sizeof(SplashVertex));
+			D3DDevice_DrawVerticesUP(D3DPT_TRIANGLESTRIP, 4, quad, sizeof(XbTyrianSplashVertex));
+			D3DDevice_EndScene();
 			D3DDevice_Swap(0);
 
 			if (phase == 1)
@@ -3946,29 +3997,14 @@ static void JE_showRXDKSplash(void)
 
 	splashTex->Release();
 	D3DDevice_SetTexture(0, NULL);
-
-#undef RXDK_SPLASH_FVF
 #endif
 }
 
 static void JE_showDarkone83Splash(void)
 {
 #ifdef _XBOX
-	struct SplashVertex
-	{
-		float x, y, z, rhw;
-		float u, v;
-	};
-
-#define DARKONE83_SPLASH_FVF (D3DFVF_XYZRHW | D3DFVF_TEX1)
-
-	static const SplashVertex quad[4] =
-	{
-		{   0.0f,   0.0f, 0.0f, 1.0f,   0.0f,   0.0f },
-		{ 640.0f,   0.0f, 0.0f, 1.0f, 640.0f,   0.0f },
-		{   0.0f, 480.0f, 0.0f, 1.0f,   0.0f, 480.0f },
-		{ 640.0f, 480.0f, 0.0f, 1.0f, 640.0f, 480.0f },
-	};
+	XbTyrianSplashVertex quad[4];
+	XbTyrian_BuildSplashQuad(quad, DARKONE83_SPLASH_WIDTH, DARKONE83_SPLASH_HEIGHT);
 
 	D3DTexture* splashTex = D3DDevice_CreateTexture2(
 		DARKONE83_SPLASH_WIDTH,
@@ -3983,20 +4019,7 @@ static void JE_showDarkone83Splash(void)
 	if (splashTex == NULL)
 		return;
 
-	D3DDevice_SetRenderState(D3DRS_ZENABLE, FALSE);
-	D3DDevice_SetRenderState(D3DRS_LIGHTING, FALSE);
-	D3DDevice_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	D3DDevice_SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-
-	D3DDevice_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	D3DDevice_SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	D3DDevice_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	D3DDevice_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_POINT);
-	D3DDevice_SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
-	D3DDevice_SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_NONE);
-	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-	D3DDevice_SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
-	D3DDevice_SetVertexShader(DARKONE83_SPLASH_FVF);
+	XbTyrian_SetSplashRenderState();
 
 	for (int phase = 0; phase < 3; ++phase)
 	{
@@ -4066,8 +4089,12 @@ static void JE_showDarkone83Splash(void)
 
 			splashTex->UnlockRect(0);
 
+			D3DDevice_BeginScene();
+			D3DDevice_Clear(0, NULL, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0);
+			XbTyrian_SetSplashRenderState();
 			D3DDevice_SetTexture(0, splashTex);
-			D3DDevice_DrawVerticesUP(D3DPT_TRIANGLESTRIP, 4, quad, sizeof(SplashVertex));
+			D3DDevice_DrawVerticesUP(D3DPT_TRIANGLESTRIP, 4, quad, sizeof(XbTyrianSplashVertex));
+			D3DDevice_EndScene();
 			D3DDevice_Swap(0);
 
 			if (phase == 1)
@@ -4079,8 +4106,6 @@ static void JE_showDarkone83Splash(void)
 
 	splashTex->Release();
 	D3DDevice_SetTexture(0, NULL);
-
-#undef DARKONE83_SPLASH_FVF
 #endif
 }
 
